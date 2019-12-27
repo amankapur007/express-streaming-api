@@ -37,6 +37,14 @@ app.get('/fmovie', (req, res) => {
         })
 });
 
+
+app.get('/top10',(req, res)=>{
+    movieService.top10Movie()
+    .then((data) => {
+        res.status(200).json(data);
+    });
+});
+
 var client = new webtorrent();
 
 var getLargestFile = function (torrent) {
