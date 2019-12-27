@@ -1,5 +1,7 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
+
 
 const url = 'https://www.imdb.com/find?s=tt&ref_=fn_al_tt_mr&q=';
 const movieUrl = 'https://www.imdb.com/title/';
@@ -7,35 +9,57 @@ const topTenMovie = 'https://www.imdb.com/list/ls003992425/';
 
 
 function top10Movie(){
-    return fetch(`${topTenMovie}`).then((response)=>{
-        return response.text();
-    }).then((body)=>{
+
+
+  return  puppeteer
+    .launch()
+    .then(browser => browser.newPage())
+    .then(page => {
+      return page.goto(`${topTenMovie}`).then(function() {
+        return page.content();
+      });
+    })
+    //    return fetch(`${topTenMovie}`).then((response)=>{
+    //  return response.text();
+    //})
+    .then((body)=>{
         movies = [];
-        const $ = cheerio.load(body);
-        $('.lister-item.mode-detail').each(function(i, element){
-            const $element = $(element);
-            $image = $element.find('.lister-item-image a img');
-            $title = $element.find('.lister-item-content h3 a');
-            $id = $element.find('.lister-item-content h3 a')
-            id = $id.attr('href').match(/title\/(.*)\//)[1]
-            $rating = $element.find('.ipl-rating-star.small span.ipl-rating-star__rating');
-            movie = {
-               image:$image.attr('src'),
-               title: $title.text(),
-               rating:$rating.text(),
-               id: id,
-               rank:i+1
-            }
-            movies.push(movie);
-        });
-        return movies;
+            var $ = cheerio.load(body);
+            $('.lister-item.mode-detail').each(function(i, element){
+                const $element = $(element);
+                $image = $element.find('.lister-item-image a img.loadlate');
+                $title = $element.find('.lister-item-content h3 a');
+                $id = $element.find('.lister-item-content h3 a')
+                id = $id.attr('href').match(/title\/(.*)\//)[1]
+                $rating = $element.find('.ipl-rating-star.small span.ipl-rating-star__rating');
+                movie = {
+                   image:$image.attr('src'),
+                   title: $title.text(),
+                   rating:$rating.text(),
+                   id: id,
+                   rank:i+1
+                }
+                movies.push(movie);
+            });
+            return movies;
     });
 }
 
 function searchMovies(searchTerm) {
     console.log(`${url}${searchTerm}`)
-    return fetch(`${url}${searchTerm}`)
-        .then(response => response.text())
+    return  puppeteer
+    .launch()
+    .then(browser => browser.newPage())
+    .then(page => {
+      return page.goto(`${url}${searchTerm}`).then(function() {
+        return page.content();
+      });
+    })
+    //    return fetch(`${topTenMovie}`).then((response)=>{
+    //  return response.text();
+    //})
+    //return fetch(`${url}${searchTerm}`)
+      //  .then(response => response.text())
         .then(body => {
             const movies = [];
             const $ = cheerio.load(body);
