@@ -105,8 +105,8 @@ app.get('/stream/:infoHash.mp4', function(req, res, next) {
     }
 });
 
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 3000
 const port = process.env.port || 3000;
 app.listen(server_port, function () {
-    console.log( "Listening on ", port )
+    console.log( "Listening on ", server_port )
   });

@@ -7,6 +7,7 @@ function getMovies(page) {
     return fetch(`${furl}${page}`)
         .then(response => response.text())
         .then(body => {
+            console.log(body);
             const movies = [];
             const $ = cheerio.load(body);
             $('.movie-list .item').each(function (i, element) {
