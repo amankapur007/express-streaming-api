@@ -106,7 +106,7 @@ app.get('/stream/:infoHash.mp4', function(req, res, next) {
 });
 
 const port = process.env.port || 8080;
-app.listen(port, () => {
+app.listen(process.env.PORT || 5000, () => {
     console.log(`Listening on ${port}`);
 });
 
