@@ -57,29 +57,33 @@ app.get('/streaming/:infoHash.mp4', async (req, res) => {
     var promise = new Promise((resolve, reject) => {
         var torrentId = buildMagnetURI(req.params.infoHash.replace(".mp4", ""));
         var torrent = client.get(torrentId);
-        if(torrent!=null){
-            return resolve(torrent);
-        }else{
-        client.add(torrentId, (torrent) => {
-            return resolve(torrent);
-        });
-    }
+        if (torrent != null) {
+            return resolve({ 'torrent': torrent, 'alreadyFound': true });
+        } else {
+            client.add(torrentId, (torrent) => {
+                console.info(new Date() + " :: Torrent added");
+                return resolve({ 'torrent': torrent, 'alreadyFound': true });
+            });
+        }
     });
     promise.then((data) => {
         if (data) {
+            console.info(new Date() + " :: Starting the streaming")
             streaming(req, res, data);
         } else {
-            res.status(500).send(500)
+            res.status(500).send(500);
+            res.end();
         }
     }).catch((error) => {
-        console.error(error.toString());
+        console.error(new Date() + " :: Error Occured , msg = " + error.toString());
         res.status(401).send('Error!');
-    });    
+        res.end();
+    });
 });
 
-function streaming(req, res, torrent){
+function streaming(req, res, data) {
     try {
-        var torrent = torrent;
+        var torrent = data.torrent;
         var file = getLargestFile(torrent);
         var total = file.length;
 
@@ -99,13 +103,25 @@ function streaming(req, res, torrent){
         var stream = file.createReadStream({ start: start, end: end });
         res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
         stream.pipe(res);
+        res.on('close', () => {
+            if (data.alreadyFound == true) {
+                //torrent.destroy(()=>{
+                  //  console.info(new Date()+" :: Torrent destroyed");
+                //});
+                //console.log(new Date() + " :: Clossing the active request for streaming");
+            }
+            res.end();
+        });
+
     } catch (err) {
+        console.error(new Date()+" :: Error ", err.toString());
         res.status(500).send('Error: ' + err.toString());
+        res.end();
     }
 }
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 const port = process.env.port || 3000;
 app.listen(server_port, function () {
-    console.log("Listening on 123", server_port)
+    console.info(new Date()+" :: Listening on ", server_port)
 });
