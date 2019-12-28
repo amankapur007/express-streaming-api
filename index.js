@@ -4,6 +4,7 @@ var webtorrent = require('webtorrent');
 const movieService = require('./search_movie');
 const moviefService = require('./f_movie');
 const stream = require('./torrent');
+const trendingApi = require('./trending');
 
 const app = express();
 
@@ -129,6 +130,15 @@ function streaming(req, res, data) {
         res.end();
     }
 }
+
+app.get('/trending',(req, res)=>{
+    trendingApi.trending().then((data)=>{
+        res.status(200).json(data)
+    }).catch((error)=>{
+        console.error(new Date()+" :: msg ",error.toString());
+        res.status(500).send(error.toString);
+    })
+})
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 const port = process.env.port || 3000;
