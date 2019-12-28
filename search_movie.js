@@ -55,9 +55,6 @@ function searchMovies(searchTerm) {
         return page.content();
       });
     })*/
-        return fetch(`${topTenMovie}`).then((response)=>{
-      return response.text();
-    })
     return fetch(`${url}${searchTerm}`)
         .then(response => response.text())
         .then(body => {
@@ -85,15 +82,23 @@ function getMovie(id){
             return response.text();
         })
         .then(body=>{
-            console.log(body);
             const $ = cheerio.load(body);
             const $title = $('.title_wrapper h1');
-
+            const $image = $('.slate_wrapper .poster a img')
+            const $subText = $('.title_block .subtext');
+            const $rating = $('.ratings_wrapper .ratingValue span');
+            const $description =$('.plot_summary_wrapper .plot_summary .summary_text')
+            subText = $subText.text().toString().trim().split("|").map((n)=>n.trim().replace('\n',''));
+            console.info(subText);
             const title = $title.first().contents().filter(function(){
                 return this.type === 'text';
             }).text().trim();
             return {
-                title
+                title:title,
+                image:$image.attr('src'),
+                subText:subText,
+                rating:$rating.text().replace('\n',''),
+                description:$description.text().replace(/\r?\n|\r/g, '').trim()
             };
         });
 }
