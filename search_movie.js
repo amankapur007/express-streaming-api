@@ -1,7 +1,5 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
-
 
 const url = 'https://www.imdb.com/find?s=tt&ref_=fn_al_tt_mr&q=';
 const movieUrl = 'https://www.imdb.com/title/';
@@ -11,17 +9,19 @@ const topTenMovie = 'https://www.imdb.com/list/ls003992425/';
 function top10Movie(){
 
 
-  return  puppeteer
+  /*return  puppeteer
     .launch()
     .then(browser => browser.newPage())
     .then(page => {
-      return page.goto(`${topTenMovie}`).then(function() {
+      return page.goto(`${topTenMovie}`,{
+        waitUntil: 'load',
+      }).then(function() {
         return page.content();
       });
+    })*/
+     return fetch(`${topTenMovie}`).then((response)=>{
+      return response.text();
     })
-    //    return fetch(`${topTenMovie}`).then((response)=>{
-    //  return response.text();
-    //})
     .then((body)=>{
         movies = [];
             var $ = cheerio.load(body);
@@ -47,19 +47,19 @@ function top10Movie(){
 
 function searchMovies(searchTerm) {
     console.log(`${url}${searchTerm}`)
-    return  puppeteer
+    /*return  puppeteer
     .launch()
     .then(browser => browser.newPage())
     .then(page => {
       return page.goto(`${url}${searchTerm}`).then(function() {
         return page.content();
       });
+    })*/
+        return fetch(`${topTenMovie}`).then((response)=>{
+      return response.text();
     })
-    //    return fetch(`${topTenMovie}`).then((response)=>{
-    //  return response.text();
-    //})
-    //return fetch(`${url}${searchTerm}`)
-      //  .then(response => response.text())
+    return fetch(`${url}${searchTerm}`)
+        .then(response => response.text())
         .then(body => {
             const movies = [];
             const $ = cheerio.load(body);

@@ -1,20 +1,20 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
+//const puppeteer = require('puppeteer');
 
 const furl = 'https://fmovies.wtf/movies?page=';
 
 function getMovies(page) {
-    return  puppeteer
+    /*return  puppeteer
     .launch()
     .then(browser => browser.newPage())
     .then(page => {
       return page.goto(`${furl}`).then(function() {
         return page.content();
       });
-    })
-    //return fetch(`${furl}${page}`)
-      //  .then(response => response.text())
+    })*/
+    return fetch(`${furl}${page}`)
+        .then(response => response.text())
         .then(body => {
             const movies = [];
             const $ = cheerio.load(body);
