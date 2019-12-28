@@ -23,7 +23,7 @@ function top10Movie(){
       return response.text();
     })
     .then((body)=>{
-        print(body);
+        console.info(body);
         movies = [];
             var $ = cheerio.load(body);
             $('.lister-item.mode-detail').each(function(i, element){
