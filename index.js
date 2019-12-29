@@ -132,7 +132,7 @@ function streaming(req, res, data) {
 }
 
 app.get('/trending',(req, res)=>{
-    trendingApi.trending().then((data)=>{
+    trendingApi.trending(req.query.page,req.query.limit).then((data)=>{
         res.status(200).json(data)
     }).catch((error)=>{
         console.error(new Date()+" :: msg ",error.toString());
@@ -141,6 +141,7 @@ app.get('/trending',(req, res)=>{
 })
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+console.log(process.env.CLIENT_ID);
 const port = process.env.port || 3000;
 app.listen(server_port, function () {
     console.info(new Date()+" :: Listening on ", server_port)

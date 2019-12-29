@@ -1,30 +1,38 @@
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
+const configApi = require('./config')
+const trakt = configApi.getTrakt();
 
-const trendingUrl = 'https://trakt.tv/movies/trending';
-
-function trending(){
-    return fetch(`${trendingUrl}`)
-    .then((response)=>response.text())
-    .then((body)=>{
-        const $ = cheerio.load(body);
-        var movies = [];
-        $('.fanarts .grid-item').each((i,element)=>{
-            $element = $(element);
-            $title = $element.find('a .fanart .titles h3').children() //select all the children
-            .remove()   //remove all the children
-            .end();
-            $image = $element.find('a meta');
-            movie = {
-                title:$title.text().trim(),
-                image:$image.attr('content')
-            }
-            if(movie.title && movie.image){
-            movies.push(movie);
-            }
+function trending(page, limit) {
+    moviesList = [];
+    return new Promise((resolve, reject) => {
+        trakt.movies.trending({
+            'page': page,
+            'limit': limit
+        }).then((movies) => {
+            var index = 0;
+            movies.data.forEach(async (data, i) => {
+                imageUrl = await getImageUrl(data.movie.ids);
+                movieObject = {
+                    title: data.movie.title,
+                    year: data.movie.year,
+                    id: data.movie.ids.imdb,
+                    image: imageUrl.poster
+                }
+                index++;
+                moviesList.push(movieObject);
+                if (index == movies.data.length) {
+                    resolve(moviesList);
+                }
+            });
+        }).catch((error) => {
+            console.error(error.toString());
+            return moviesList;
         });
-        return movies;
-    });
+    })
+}
+
+function getImageUrl(ids) {
+    ids['type'] = 'movie'
+    return trakt.images.get(ids);
 }
 
 module.exports = {
