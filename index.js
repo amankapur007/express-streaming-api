@@ -5,6 +5,7 @@ const movieService = require('./search_movie');
 const moviefService = require('./f_movie');
 const stream = require('./torrent');
 const trendingApi = require('./trending');
+const popularApi = require('./popular');
 
 const app = express();
 
@@ -133,6 +134,15 @@ function streaming(req, res, data) {
 
 app.get('/trending',(req, res)=>{
     trendingApi.trending(req.query.page,req.query.limit).then((data)=>{
+        res.status(200).json(data)
+    }).catch((error)=>{
+        console.error(new Date()+" :: msg ",error.toString());
+        res.status(500).send(error.toString);
+    })
+})
+
+app.get('/popular',(req, res)=>{
+    popularApi.popular(req.query.page,req.query.limit).then((data)=>{
         res.status(200).json(data)
     }).catch((error)=>{
         console.error(new Date()+" :: msg ",error.toString());
