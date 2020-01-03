@@ -6,6 +6,7 @@ const moviefService = require('./f_movie');
 const stream = require('./torrent');
 const trendingApi = require('./trending');
 const popularApi = require('./popular');
+const movie = require('./movies/movie');
 
 const app = express();
 
@@ -149,6 +150,8 @@ app.get('/popular',(req, res)=>{
         res.status(500).send(error.toString);
     })
 })
+
+app.use("/movie",movie);
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 console.log(process.env.CLIENT_ID);

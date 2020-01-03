@@ -15,7 +15,7 @@
     "node-fetch": "^2.6.0",
     "nodemon": "^2.0.2",
     "torrent-stream": "^1.2.0",
-    "trakt.tv": "^7.2.0",
+    "@amankapur007/trakt.tv": "1.0.0",
     "trakt.tv-images": "^5.2.0",
     "webtorrent": "^0.107.17"
   }
