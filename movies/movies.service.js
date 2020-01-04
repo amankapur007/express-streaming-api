@@ -1,5 +1,8 @@
 const configApi = require('../config')
 const trakt = configApi.getTrakt();
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
+
 
 async function getMovieById(id, query) {
     var moviesList = [];
@@ -42,6 +45,40 @@ function getImageUrl(ids) {
     return trakt.images.get(ids);
 }
 
+async function getUrlLinks(query){
+    var urls = [];
+    var url = `https://thepiratebays.info/search/${query}/1/7/201`
+    return await fetch(url).then((response)=>{
+        return response.text();
+      })
+      .then((body)=>{
+        var $ = cheerio.load(body);
+        $('#searchResult tbody tr').each(function(i, element){
+            $element = $(element);
+            var $title = $element.find('td>div.detName');
+            var margnetLink = $element.find('td>a');
+            var size = $element.find('td>font.detDesc')
+            if(margnetLink.length>=1){
+                var $magnetLink  = $(margnetLink[0]);
+                var link = $magnetLink.attr('href')
+                if(link.toLowerCase().startsWith('magnet') && link.split(':btih:')[1]!=undefined && link.split(':btih:')[1].split('&')[0]!=undefined){
+                urlObj = {
+                    title:$title ?$title.text().trim():'',
+                    margnetLink: link?link.split(':btih:')[1].split('&')[0]:'',
+                    size:(size?size.text().trim().split(',')[1]:'Size -').trim()
+                }
+                urls.push(urlObj)
+            }
+            }else{
+
+            }
+
+        });
+        return urls;
+      });
+}
+
 module.exports = {
-    getMovieById
+    getMovieById,
+    getUrlLinks
 }

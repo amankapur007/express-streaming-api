@@ -12,5 +12,9 @@ router.get("/:id", async function (req, res) {
     res.status(200).json(moviesList)
 })
 
+router.get("/urls/:query",async function (req, res) {
+  var moviesList = await movies.getUrlLinks(req.params.query);
+  res.status(200).json(moviesList)
+})
 
 module.exports = router
