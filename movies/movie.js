@@ -13,7 +13,7 @@ router.get("/:id", async function (req, res) {
 })
 
 router.get("/urls/:query",async function (req, res) {
-  var moviesList = await movies.getLinks(req.params.query);
+  var moviesList = await movies.getUrlLinks(req.params.query);
   res.status(200).json(moviesList)
 })
 
