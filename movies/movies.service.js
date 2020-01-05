@@ -84,7 +84,7 @@ async function getUrlLinks(query){
                 if(link.toLowerCase().startsWith('magnet') && link.split(':btih:')[1]!=undefined && link.split(':btih:')[1].split('&')[0]!=undefined){
                 urlObj = {
                     title:$title ?$title.text().trim():'',
-                    margnetLink: link,
+                    magnet: link,
                     size:(size?size.text().trim().split(',')[1]:'Size -').trim(),
                     seeds:$seeds?parseInt($seeds.text()):0
                 }
