@@ -1,15 +1,13 @@
-var torrentStream = require('torrent-stream');
 const express = require('express');
 fs = require('fs')
 var webtorrent = require('webtorrent');
 const movieService = require('./search_movie');
 const moviefService = require('./f_movie');
-const stream = require('./torrent');
 const trendingApi = require('./trending');
 const popularApi = require('./popular');
 const movie = require('./movies/movie');
 const bodyParser = require('body-parser');
-
+var rimraf = require("rimraf");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -95,11 +93,10 @@ app.get('/streaming/:data', async (req, res) => {
         if (torrent != null) {
             console.info("Torrent ready :: ",torrent.ready)
                 if(torrent.ready){
-                return resolve({ 'torrent': torrent, 'alreadyFound': true });    
-                
+                return resolve({ 'torrent': torrent, 'alreadyFound': true });                    
                 }
         } else {
-            client.add(torrentId, (torrent) => {
+            client.add(torrentId, "\\user",(torrent) => {
                 console.info(new Date() + " :: Torrent added - ",torrentId);
                 return resolve({ 'torrent': torrent, 'alreadyFound': true });
             });
@@ -142,11 +139,12 @@ function streaming(req, res, data) {
             var start = 0; var end = total;
             var chunksize = (end - start) + 1;
         }
-        console.log(torrent.path);
         var stream = file.createReadStream({ start: start, end: end });
         res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
         stream.pipe(res);
         res.on('close', () => {
+            var dir = torrent.path;
+            rimraf(dir, function () { console.log("deleted ", dir); });
             if (data.alreadyFound == true) {
                 //torrent.destroy(()=>{
                   //  console.info(new Date()+" :: Torrent destroyed");
@@ -158,6 +156,8 @@ function streaming(req, res, data) {
 
     } catch (err) {
         console.error(new Date()+" :: Error ", err.toString());
+        var dir = torrent.path;
+        rimraf(dir, function () { console.log("deleted ", dir); });
         try{
         torrent.destroy(()=>{
              console.info(new Date()+" :: Torrent destroyed");
