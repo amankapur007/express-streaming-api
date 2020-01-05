@@ -140,10 +140,10 @@ function streaming(req, res, data) {
         stream.pipe(res);
         res.on('close', () => {
             if (data.alreadyFound == true) {
-                torrent.destroy(()=>{
-                    console.info(new Date()+" :: Torrent destroyed");
-                });
-                console.log(new Date() + " :: Clossing the active request for streaming");
+                //torrent.destroy(()=>{
+                  //  console.info(new Date()+" :: Torrent destroyed");
+                //});
+                //console.log(new Date() + " :: Clossing the active request for streaming");
             }
             res.end();
         });
