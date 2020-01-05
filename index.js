@@ -7,8 +7,13 @@ const stream = require('./torrent');
 const trendingApi = require('./trending');
 const popularApi = require('./popular');
 const movie = require('./movies/movie');
+const bodyParser = require('body-parser');
+
 
 const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.raw());
 
 app.get('/', (req, res) => {
     res.json({
@@ -64,9 +69,25 @@ var buildMagnetURI = function (infoHash) {
     return 'magnet:?xt=urn:btih:' + infoHash + '&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969';
 };
 
-app.get('/streaming', async (req, res) => {
+var formURI = function(xt,dn,tr){
+    var magnetLink = 'magnet:?xt='+xt+"&dn="+dn;
+    for(var i = 0;i<tr.length;i++){
+        magnetLink = magnetLink+"&tr="+tr[i]
+    }
+    console.info("URI Formed : "+encodeURI(magnetLink));
+    return encodeURI(magnetLink);
+}
+app.get('/streaming/:data', async (req, res) => {
     var promise = new Promise((resolve, reject) => {
-        var torrentId = buildMagnetURI(req.query.hash.replace(".mp4", ""));
+        if(req.query.magnet!=null || req.query.magnet!=undefined){
+            var xt = req.query.xt;
+             var dn = req.query.dn;
+            var tr = req.query.tr;
+            var torrentId =  formURI(xt,dn,tr);
+        }else{
+            var torrentId = buildMagnetURI(req.query.hash.replace(".mp4", ""));
+        }
+        console.info(torrentId)
         var torrent = client.get(torrentId);
         if (torrent != null) {
             return resolve({ 'torrent': torrent, 'alreadyFound': true });
@@ -95,8 +116,9 @@ app.get('/streaming', async (req, res) => {
 });
 
 function streaming(req, res, data) {
+    var torrent = null;
     try {
-        var torrent = data.torrent;
+        torrent = data.torrent;
         var file = getLargestFile(torrent);
         var total = file.length;
 
@@ -128,6 +150,9 @@ function streaming(req, res, data) {
 
     } catch (err) {
         console.error(new Date()+" :: Error ", err.toString());
+        torrent.destroy(()=>{
+            console.info(new Date()+" :: Torrent destroyed");
+        })
         res.status(500).send('Error: ' + err.toString());
         res.end();
     }
