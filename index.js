@@ -1,3 +1,4 @@
+var torrentStream = require('torrent-stream');
 const express = require('express');
 fs = require('fs')
 var webtorrent = require('webtorrent');
@@ -121,13 +122,14 @@ app.get('/streaming/:data', async (req, res) => {
     });
 });
 
+
 function streaming(req, res, data) {
     var torrent = null;
     try {
         torrent = data.torrent;
         var file = getLargestFile(torrent);
         var total = file.length;
-
+        res.header("Range","bytes=1-999");
         if (typeof req.headers.range != 'undefined') {
             var range = req.headers.range;
             var parts = range.replace(/bytes=/, "").split("-");
@@ -140,7 +142,7 @@ function streaming(req, res, data) {
             var start = 0; var end = total;
             var chunksize = (end - start) + 1;
         }
-
+        console.log(torrent.path);
         var stream = file.createReadStream({ start: start, end: end });
         res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
         stream.pipe(res);
