@@ -88,9 +88,13 @@ app.get('/streaming/:data', async (req, res) => {
             var torrentId = buildMagnetURI(req.query.hash.replace(".mp4", ""));
         }
         console.info(torrentId)
+       
         var torrent = client.get(torrentId);
-        if (torrent != null) {
-            return resolve({ 'torrent': torrent, 'alreadyFound': true });
+        if (torrent != null){
+        console.info("Torrent Ready :  ",torrent.ready)
+        }
+        if (torrent != null && torrent.ready) {
+                return resolve({ 'torrent': torrent, 'alreadyFound': true });            
         } else {
             client.add(torrentId, (torrent) => {
                 console.info(new Date() + " :: Torrent added - ",torrentId);
