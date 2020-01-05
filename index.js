@@ -149,10 +149,7 @@ function streaming(req, res, data) {
         });
 
     } catch (err) {
-        console.error(new Date()+" :: Error ", err.toString());
-        torrent.destroy(()=>{
-            console.info(new Date()+" :: Torrent destroyed");
-        })
+        console.error(new Date()+" :: Error ", err.toString(),"Aman");
         res.status(500).send('Error: ' + err.toString());
         res.end();
     }
