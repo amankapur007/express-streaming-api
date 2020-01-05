@@ -3,6 +3,17 @@ const trakt = configApi.getTrakt();
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
+const TorrentSearchApi = require('torrent-search-api');
+
+TorrentSearchApi.getProviders().forEach((i)=>{
+    if(i!=undefined){
+        try{
+        TorrentSearchApi.enableProvider(i.name);
+        }catch(error){
+            console.error(error.toString())       
+        }
+    }
+})
 
 async function getMovieById(id, query) {
     var moviesList = [];
@@ -45,6 +56,14 @@ function getImageUrl(ids) {
     return trakt.images.get(ids);
 }
 
+
+async function getLinks(query){
+ 
+// Search '1080' in 'Movies' category and limit to 20 results
+const torrents = await TorrentSearchApi.search(query, 'Movies');console.log(torrents);
+    return torrents.filter((torrent)=>{return torrent.magnet!=null && torrent.magnet!=undefined});
+}
+
 async function getUrlLinks(query){
     var urls = [];
     var url = `https://thepiratebays.info/search/${query}/1/7/201`
@@ -58,14 +77,16 @@ async function getUrlLinks(query){
             var $title = $element.find('td>div.detName');
             var margnetLink = $element.find('td>a');
             var size = $element.find('td>font.detDesc')
+            var $seeds = $($element.find('td')[2]);
             if(margnetLink.length>=1){
                 var $magnetLink  = $(margnetLink[0]);
                 var link = $magnetLink.attr('href')
                 if(link.toLowerCase().startsWith('magnet') && link.split(':btih:')[1]!=undefined && link.split(':btih:')[1].split('&')[0]!=undefined){
                 urlObj = {
                     title:$title ?$title.text().trim():'',
-                    margnetLink: link?link.split(':btih:')[1].split('&')[0]:'',
-                    size:(size?size.text().trim().split(',')[1]:'Size -').trim()
+                    margnetLink: link,
+                    size:(size?size.text().trim().split(',')[1]:'Size -').trim(),
+                    seeds:$seeds?parseInt($seeds.text()):0
                 }
                 urls.push(urlObj)
             }
@@ -80,5 +101,6 @@ async function getUrlLinks(query){
 
 module.exports = {
     getMovieById,
-    getUrlLinks
+    getUrlLinks,
+    getLinks
 }
