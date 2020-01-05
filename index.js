@@ -7,8 +7,13 @@ const stream = require('./torrent');
 const trendingApi = require('./trending');
 const popularApi = require('./popular');
 const movie = require('./movies/movie');
+const bodyParser = require('body-parser');
+
 
 const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.raw());
 
 app.get('/', (req, res) => {
     res.json({
@@ -111,8 +116,9 @@ app.get('/streaming/:data', async (req, res) => {
 });
 
 function streaming(req, res, data) {
+    var torrent = null;
     try {
-        var torrent = data.torrent;
+        torrent = data.torrent;
         var file = getLargestFile(torrent);
         var total = file.length;
 
@@ -129,7 +135,7 @@ function streaming(req, res, data) {
             var chunksize = (end - start) + 1;
         }
 
-        var stream = file.createReadStream({ start: start, end: end, });
+        var stream = file.createReadStream({ start: start, end: end });
         res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
         stream.pipe(res);
         res.on('close', () => {
@@ -143,7 +149,14 @@ function streaming(req, res, data) {
         });
 
     } catch (err) {
-        console.error(new Date()+" :: Error ", err.toString(),"Aman");
+        console.error(new Date()+" :: Error ", err.toString());
+        try{
+        torrent.destroy(()=>{
+             console.info(new Date()+" :: Torrent destroyed");
+        });
+         }catch(err){
+        console.log(err.toString())
+        }
         res.status(500).send('Error: ' + err.toString());
         res.end();
     }
