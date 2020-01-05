@@ -60,7 +60,7 @@ function getImageUrl(ids) {
 async function getLinks(query){
  
 // Search '1080' in 'Movies' category and limit to 20 results
-const torrents = await TorrentSearchApi.search(query, 'Movies');console.log(torrents);
+const torrents = await TorrentSearchApi.search(query, 'Movies',20);console.log(torrents);
     return torrents.filter((torrent)=>{return torrent.magnet!=null && torrent.magnet!=undefined});
 }
 
