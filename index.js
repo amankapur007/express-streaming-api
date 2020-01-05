@@ -129,7 +129,7 @@ function streaming(req, res, data) {
         torrent = data.torrent;
         var file = getLargestFile(torrent);
         var total = file.length;
-        res.header("Range","bytes=1-999");
+        req.header("Range","bytes=1-999");
         if (typeof req.headers.range != 'undefined') {
             var range = req.headers.range;
             var parts = range.replace(/bytes=/, "").split("-");
